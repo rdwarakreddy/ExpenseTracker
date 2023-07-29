@@ -1,0 +1,263 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{%load humanize%}
+{% block body %}
+<html>
+<head>
+    <title>My Webpage</title>
+    <style>
+        body {
+            font-family: cursive;
+            background-color: #f2f2f2;
+        }
+        
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-box {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .form-box2 {
+            background-color: lightgray;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-box label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .form-box input[type="text"],
+        .form-box input[type="number"],
+        .form-box select {
+            flex: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #cccccc;
+            box-sizing: border-box;
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" class="form-box2">
+        {% csrf_token %}
+        <h1>Expense Form</h1>
+        <div class="form-box">
+            <label for="id_name">Name:</label>
+            {{ expense_form.name }}
+        </div>
+        <div class="form-box">
+            <label for="id_amount">Amount:</label>
+            {{ expense_form.amount }}
+        </div>
+        <div class="form-box">
+            <label for="id_category">Category:</label>
+            {{ expense_form.category }}
+        </div>
+        <div>
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+</br></br>
+
+<form method="POST" style="max-width: 1000px; margin: 0 auto; background-color: lightgray;box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+    <div style="padding: 30px;">
+        <div style="display: flex;">
+            <div style="flex: 1; margin-right: 20px;">
+                <table style="border-collapse: separate; border-spacing: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); background-color: #f9f9f9;">
+                    <h1>Expense Calculator</h1>
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 10px;">Name</th>
+                            <th style="border: 1px solid #ccc; padding: 10px;">Amount</th>
+                            <th style="border: 1px solid #ccc; padding: 20px;">Date</th>
+                            <th style="border: 1px solid #ccc; padding: 10px;">Category</th>
+                            <th style="border: 1px solid #ccc; padding: 10px;">Edit</th>
+                            <th style="border: 1px solid #ccc; padding: 10px;">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px;">{{ expense.name }}</td>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px;">₹{{ expense.amount }}</td>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px; width: 200px;">{{ expense.date }}</td>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px;">{{ expense.category }}</td>
+                                <td style="border: 1px solid #ccc; padding: 10px;">
+                                    <a href="{% url 'edit' expense.id %}">
+                                        <img src="https://cdn4.iconfinder.com/data/icons/evil-icons-user-interface/64/pen-64.png" alt="Edit" width="20" height="20">
+                                    </a>
+                                </td>
+                                <td style="border: 1px solid #ccc; padding: 10px;">
+                                    <a href="{% url 'delete' expense.id %}">
+                                        <img src="https://cdn4.iconfinder.com/data/icons/evil-icons-user-interface/64/basket-64.png" alt="Edit" width="20" height="20">
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr style="background-color: lightgreen;">
+                            <td colspan="6" style="border: 1px solid #ccc; padding: 10px; font-size: 12px; text-align: right;">Total Amount: ₹{{ total_expense.amount__sum|intcomma }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+               
+            </div>
+            <div style="flex: 1;">
+                <table style="border-collapse: separate; border-spacing: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); background-color: #f9f9f9;">
+                    <h1>Categorical Sum</h1>
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 20px;">Category</th>
+                            <th style="border: 1px solid #ccc; padding: 20px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categorical_sum %}
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px;">{{ category.category }}</td>
+                                <td style="border: 1px solid #ccc; padding: 10px; font-size: 12px;">₹{{ category.sum }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr style="background-color: lightgreen;">
+                            <td colspan="6" style="border: 1px solid #ccc; padding: 10px; font-size: 12px; text-align: right;">Total Amount: ₹{{ total_expense.amount__sum|intcomma }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+</br></br>
+
+{% comment %} <div class="flex">
+    <div class="w-1/2 shadow-lg ml-10">
+        <h1>Expense Spread across Categories</h1>
+        <canvas id="myChart1"></canvas>
+    </div>
+    <div class="w-1/2 shadow-lg ml-10">
+        <h1>Expense Spread across Categories</h1>
+        <canvas id="myChart2" class="m-10"></canvas>
+    </div>
+</div> {% endcomment %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.umd.min.js"></script>
+<script>
+    var ctx1 = document.getElementById('myChart1').getContext('2d');
+    var myChart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    var ctx2 = document.getElementById('myChart2').getContext('2d');
+    var myChart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+    
+</body>
+</html>
+
+</html>
+{% endblock %}
